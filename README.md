@@ -1,2 +1,283 @@
 # Gift
 Personalized Gift
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Happy Birthday</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: sans-serif;
+  overflow: hidden;
+  background: black;
+  color: white;
+}
+
+/* LOCK SCREEN */
+.lock-screen {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg,#ff758c,#ff7eb3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 10;
+}
+
+input {
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  margin: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.progress-bar {
+  width: 200px;
+  height: 6px;
+  background: rgba(255,255,255,0.3);
+  margin-top: 10px;
+}
+
+#progress {
+  height: 100%;
+  width: 0%;
+  background: white;
+}
+
+/* STORY */
+#storyContainer {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+.slide {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: 0.5s;
+}
+
+.slide img {
+  width: 85%;
+  border-radius: 15px;
+  margin-top: 15px;
+}
+
+/* dots */
+#dots {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background: gray;
+  border-radius: 50%;
+}
+
+.dot.active {
+  background: white;
+}
+
+/* FINAL TEXT */
+.big-text {
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 10px white; }
+  to { text-shadow: 0 0 30px pink; }
+}
+
+/* EMOJI FALL */
+@keyframes fallEmoji {
+  to {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOCK -->
+<div class="lock-screen" id="lockScreen">
+  <h2>🔒 Enter Password</h2>
+  <input id="passwordInput" placeholder="Password">
+  <button 
+    onmousedown="startHold()" 
+    onmouseup="cancelHold()"
+    ontouchstart="startHold()" 
+    ontouchend="cancelHold()"
+  >Hold to Unlock 🔓</button>
+
+  <div class="progress-bar">
+    <div id="progress"></div>
+  </div>
+
+  <p id="errorMsg"></p>
+</div>
+
+<!-- STORY -->
+<div id="storyContainer" style="display:none;">
+  <div id="slides"></div>
+  <div id="dots"></div>
+</div>
+
+<script>
+const PASSWORD = "I Love You";
+
+/* HOLD UNLOCK */
+let holdTime = 0;
+let interval;
+
+function startHold() {
+  let input = document.getElementById("passwordInput").value.toLowerCase();
+
+  if (input !== PASSWORD.toLowerCase()) {
+    document.getElementById("errorMsg").innerText = "Hint: 3 simple words ❤️";
+    return;
+  }
+
+  interval = setInterval(() => {
+    holdTime += 50;
+    document.getElementById("progress").style.width = (holdTime/1500)*100 + "%";
+
+    if (holdTime >= 1500) unlock();
+  }, 50);
+}
+
+function cancelHold() {
+  clearInterval(interval);
+  holdTime = 0;
+  document.getElementById("progress").style.width = "0%";
+}
+
+function unlock() {
+  clearInterval(interval);
+  document.getElementById("lockScreen").style.display = "none";
+  document.getElementById("storyContainer").style.display = "block";
+}
+
+/* STORY DATA */
+const messages = [
+  { text: "Happy Birthday Meraa Pookie Bchaaaaaaaaaa 🧿💖" },
+  { text: "Before anything else… I’m sorry." },
+  {text: " Sorry for the mistakes, for the times I hurt you,For the words I couldn’t say right,And the moments I should have understood you better 🧿🫂 " }
+  { text: "You mean everything to me ❤️" },
+  { text: "You are my happiness 💖" },
+  { text: "You deserve all the love in the world ✨" },
+  { text: "HAPPY BIRTHDAY 🎂🎉❤️" },
+  {
+    text: "🧿 I Loveeeeee Youuuuuuuuuu So Muchhhhhhhhhhhhh Meraa Pookie Bchaaaa Mere Pati Parmeshwar Ji Mere Pyaareeee Se Kannu Ji Mereeee Everything 🧿",
+    big: true,
+    final: true
+  }
+];
+
+let current = 0;
+
+/* CREATE SLIDES */
+const slides = document.getElementById("slides");
+const dots = document.getElementById("dots");
+
+messages.forEach((msg, i) => {
+  let slide = document.createElement("div");
+  slide.className = "slide";
+  slide.style.transform = `translateX(${i*100}%)`;
+
+  let text = document.createElement("h2");
+  text.innerHTML = msg.text.replace(/\n/g,"<br>");
+  if (msg.big) text.classList.add("big-text");
+
+  slide.appendChild(text);
+
+  if (msg.image) {
+    let img = document.createElement("img");
+    img.src = msg.image;
+    slide.appendChild(img);
+  }
+
+  slides.appendChild(slide);
+
+  let dot = document.createElement("div");
+  dot.className = "dot";
+  dots.appendChild(dot);
+});
+
+/* UPDATE */
+function update() {
+  document.querySelectorAll(".slide").forEach((s,i)=>{
+    s.style.transform = `translateX(${(i-current)*100}%)`;
+  });
+
+  document.querySelectorAll(".dot").forEach((d,i)=>{
+    d.classList.toggle("active", i===current);
+  });
+
+  if (messages[current].final) createEmojiRain();
+}
+
+/* SWIPE */
+let startX=0;
+
+document.addEventListener("touchstart",e=>{
+  startX=e.touches[0].clientX;
+});
+
+document.addEventListener("touchend",e=>{
+  let diff = startX - e.changedTouches[0].clientX;
+
+  if (Math.abs(diff)<50) return;
+
+  if (diff>0 && current<messages.length-1) current++;
+  else if (diff<0 && current>0) current--;
+
+  update();
+});
+
+/* EMOJI RAIN */
+function createEmojiRain() {
+  for(let i=0;i<40;i++){
+    let el=document.createElement("div");
+    el.innerText="🧿";
+    el.style.position="fixed";
+    el.style.top="-20px";
+    el.style.left=Math.random()*100+"vw";
+    el.style.fontSize="24px";
+    el.style.animation="fallEmoji 3s linear forwards";
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),3000);
+  }
+}
+
+update();
+</script>
+
+</body>
+</html>
